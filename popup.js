@@ -151,33 +151,72 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Simple markdown to HTML converter
     function markdownToHtml(markdown) {
-        let html = markdown;
+        // Split into lines for better processing
+        const lines = markdown.split('\n');
+        let html = '';
+        let inList = false;
         
-        // Headers
-        html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-        html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-        html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            
+            // Skip empty lines
+            if (!line) {
+                if (inList) {
+                    html += '</ul>';
+                    inList = false;
+                }
+                html += '<br>';
+                continue;
+            }
+            
+            // Headers
+            if (line.startsWith('### ')) {
+                if (inList) { html += '</ul>'; inList = false; }
+                html += '<h3>' + line.substring(4) + '</h3>';
+            } else if (line.startsWith('## ')) {
+                if (inList) { html += '</ul>'; inList = false; }
+                html += '<h2>' + line.substring(3) + '</h2>';
+            } else if (line.startsWith('# ')) {
+                if (inList) { html += '</ul>'; inList = false; }
+                html += '<h1>' + line.substring(2) + '</h1>';
+            }
+            // List items
+            else if (line.startsWith('- ') || line.startsWith('* ')) {
+                if (!inList) {
+                    html += '<ul>';
+                    inList = true;
+                }
+                html += '<li>' + formatInline(line.substring(2)) + '</li>';
+            }
+            // Regular paragraphs
+            else {
+                if (inList) {
+                    html += '</ul>';
+                    inList = false;
+                }
+                html += '<p>' + formatInline(line) + '</p>';
+            }
+        }
         
-        // Bold
-        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        
-        // Italic
-        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-        
-        // Links
-        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
-        
-        // Line breaks
-        html = html.replace(/\n\n/g, '</p><p>');
-        html = html.replace(/\n/g, '<br>');
-        
-        // Wrap in paragraph tags
-        html = '<p>' + html + '</p>';
-        
-        // Lists
-        html = html.replace(/<p>- (.*?)<br>/g, '<ul><li>$1</li>');
-        html = html.replace(/<\/li><\/p>/g, '</li></ul>');
+        // Close any open lists
+        if (inList) {
+            html += '</ul>';
+        }
         
         return html;
+    }
+    
+    // Format inline markdown (bold, italic, links)
+    function formatInline(text) {
+        // Bold
+        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        // Italic
+        text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        
+        // Links
+        text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+        
+        return text;
     }
 });

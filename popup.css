@@ -230,7 +230,8 @@ button {
 }
 
 .brochure-content p {
-    margin-bottom: 10px;
+    margin: 0 0 10px 0;
+    padding: 0;
 }
 
 .brochure-content strong {
@@ -247,12 +248,14 @@ button {
 }
 
 .brochure-content ul {
-    margin-left: 20px;
-    margin-bottom: 10px;
+    margin: 0 0 10px 0;
+    padding-left: 20px;
+    list-style-type: disc;
 }
 
 .brochure-content li {
     margin-bottom: 5px;
+    padding: 0;
 }
 
 /* Scrollbar styling */
